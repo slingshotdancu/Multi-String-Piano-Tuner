@@ -1,5 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { Head } from "expo-router/head";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -285,6 +286,14 @@ export default function TunerScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <Head>
+        <title>Piano Tuner</title>
+        <meta
+          name="description"
+          content="Professional real-time piano tuner. Detects pitch with precision, shows deviation in cents or Hz, and supports single-string bass, two-string mid, and three-string treble unison tuning."
+        />
+        <meta name="theme-color" content="#0B0B10" />
+      </Head>
       <StatusBar barStyle="light-content" />
 
       {/* Background gradient */}

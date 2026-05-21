@@ -18,7 +18,13 @@
     },
     "android": {},
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "name": "Piano Tuner",
+      "shortName": "Piano Tuner",
+      "description": "Professional real-time piano tuner for iOS. Detects pitch with precision, shows deviation in cents or Hz, and supports single-string bass, two-string mid, and three-string treble unison tuning.",
+      "lang": "en",
+      "themeColor": "#0B0B10",
+      "backgroundColor": "#0B0B10"
     },
     "plugins": [
       [
