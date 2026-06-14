@@ -14,7 +14,11 @@
       "backgroundColor": "#0B0B10"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.danieljobe.pianotuner",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {},
     "web": {
@@ -39,6 +43,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "88c5ecce-24c7-4a21-8e2a-62a5b6bb63c0"
+      }
     }
   }
 }
