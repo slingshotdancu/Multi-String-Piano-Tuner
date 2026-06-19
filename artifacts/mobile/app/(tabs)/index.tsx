@@ -271,7 +271,7 @@ function NoteDisplay() {
 export default function TunerScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { currentNote, isActive, strings, stringCount, displayMode, isSimulation, error } =
+  const { currentNote, isActive, strings, stringCount, displayMode, error } =
     useTuner();
 
   const topPad =
@@ -307,20 +307,18 @@ export default function TunerScreen() {
           <Text style={[styles.appTitle, { color: colors.mutedForeground }]}>
             PIANO TUNER
           </Text>
-          {isSimulation && (
-            <View
-              style={[
-                styles.simBadge,
-                { backgroundColor: colors.secondary, borderColor: colors.border },
-              ]}
+          <View
+            style={[
+              styles.simBadge,
+              { backgroundColor: colors.secondary, borderColor: colors.border },
+            ]}
+          >
+            <Text
+              style={[styles.simText, { color: colors.mutedForeground }]}
             >
-              <Text
-                style={[styles.simText, { color: colors.mutedForeground }]}
-              >
-                DEMO
-              </Text>
-            </View>
-          )}
+              PRO
+            </Text>
+          </View>
         </View>
 
         {error ? (
