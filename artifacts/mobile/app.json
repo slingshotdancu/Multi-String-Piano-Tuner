@@ -14,7 +14,7 @@
       "backgroundColor": "#0B0B10"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.danieljobe.pianotuner",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -31,15 +31,18 @@
       "backgroundColor": "#0B0B10"
     },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
-      "expo-font",
-      "expo-web-browser"
-    ],
+  "expo-router",
+  "expo-font",
+  "expo-web-browser",
+  [
+    "@siteed/audio-studio",
+    {
+      "iosConfig": {
+        "microphoneUsageDescription": "Piano Tuner uses the microphone to detect the pitch of your piano strings in real time."
+      }
+    }
+  ]
+],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

@@ -233,6 +233,12 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))
+      '@siteed/audio-studio':
+        specifier: ~3.2.0
+        version: 3.2.0(@expo/config-plugins@54.0.4)(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@siteed/expo-audio-studio':
+        specifier: ~3.2.1
+        version: 3.2.1(@expo/config-plugins@54.0.4)(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
@@ -2261,6 +2267,18 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
+
+  '@siteed/audio-studio@3.2.0':
+    resolution: {integrity: sha512-fU4aTIrwoo/DNLhbxsHlKyxw9NoC/rr6EuuBZHU8MRViL/M9qNQNDiWphXAF8G09eDJBk/uXxzU1+DamzNNmsQ==}
+    peerDependencies:
+      '@expo/config-plugins': '>=7.0.0'
+      expo: '>=52.0.0'
+      react: '*'
+      react-native: '*'
+
+  '@siteed/expo-audio-studio@3.2.1':
+    resolution: {integrity: sha512-XZ15OKiYjm8oqGuskDsa4T0WbAia6sg2/16LGggROTFXsQ5GEY3OqA9XD17nYBv7oxt6qFzVwelhwVepQ8x0Lw==}
+    deprecated: 'Deprecated: use @siteed/audio-studio instead. This compatibility shim only re-exports @siteed/audio-studio.'
 
   '@stardazed/streams-text-encoding@1.0.2':
     resolution: {integrity: sha512-f2Z15BId3t44a/u21yYSGXFAkCyKocmAyduoAy7swnZ4xIfbaZlOWsgly/jDNNOuj6hYQN72UaBRe3Z/tOHfqg==}
@@ -4878,6 +4896,7 @@ packages:
   recharts@2.15.4:
     resolution: {integrity: sha512-UT/q6fwS3c1dHbXv2uFgYJ9BMFHu3fwnd7AYZaEQhXuYQ4hgsxLvsUXzGdKeZrW5xopzDCvuA2N41WJ88I7zIw==}
     engines: {node: '>=14'}
+    deprecated: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -8106,6 +8125,22 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
+
+  '@siteed/audio-studio@3.2.0(@expo/config-plugins@54.0.4)(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@expo/config-plugins': 54.0.4
+      expo: 54.0.34(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
+
+  '@siteed/expo-audio-studio@3.2.1(@expo/config-plugins@54.0.4)(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@siteed/audio-studio': 3.2.0(@expo/config-plugins@54.0.4)(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+    transitivePeerDependencies:
+      - '@expo/config-plugins'
+      - expo
+      - react
+      - react-native
 
   '@stardazed/streams-text-encoding@1.0.2': {}
 
