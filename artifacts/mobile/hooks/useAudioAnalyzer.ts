@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import {
+  useAudioRecorder,
   ExpoAudioStreamModule,
   type AudioDataEvent,
 } from "@siteed/expo-audio-studio";
@@ -155,6 +156,44 @@ export function useAudioAnalyzer(): AudioAnalyzerResult {
     noteDuration: 5000,
   });
 
+  // Native recorder hook (standalone — no provider needed). This internally
+  // wires the native 'AudioData' event stream to our onAudioStream callback.
+  const recorder = useAudioRecorder();
+
+  // Stable handler that feeds incoming PCM into the autocorrelation buffer.
+  const handleAudioStream = useCallback(async (event: AudioDataEvent) => {
+    let chunk: Float32Array;
+    const data = event.data as unknown;
+    if (data instanceof Float32Array) {
+      chunk = data;
+    } else if (Array.isArray(data)) {
+      chunk = Float32Array.from(data as number[]);
+    } else if (typeof data === "string") {
+      chunk = base64Pcm16ToFloat32(data);
+    } else {
+      return;
+    }
+
+    const buf = nativeBufRef.current;
+    let fill = nativeFillRef.current;
+    for (let i = 0; i < chunk.length; i++) {
+      buf[fill++] = chunk[i];
+      if (fill >= NATIVE_BUFFER_SIZE) {
+        const freq = autoCorrelate(buf, NATIVE_SAMPLE_RATE);
+        if (freq > 27 && freq < 4200) {
+          const recent = nativeFreqsRef.current;
+          recent.push(freq);
+          if (recent.length > 5) recent.shift();
+          const sorted = [...recent].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)];
+          setCurrentNote(frequencyToNote(median));
+        }
+        fill = 0;
+      }
+    }
+    nativeFillRef.current = fill;
+  }, []);
+
   const stopInternal = useCallback(() => {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -167,7 +206,6 @@ export function useAudioAnalyzer(): AudioAnalyzerResult {
     if (nativeSubRef.current) {
       nativeSubRef.current.remove();
       nativeSubRef.current = null;
-      ExpoAudioStreamModule.stopRecording().catch(() => {});
     }
     nativeFillRef.current = 0;
     nativeFreqsRef.current = [];
@@ -261,101 +299,37 @@ export function useAudioAnalyzer(): AudioAnalyzerResult {
   }, [startSimulation]);
 
   const startNative = useCallback(async () => {
-    // Request microphone permission via the native module.
+    nativeFillRef.current = 0;
+    nativeFreqsRef.current = [];
+
     try {
       const perm = await ExpoAudioStreamModule.requestPermissionsAsync();
-      if (!perm.granted) {
+      if (perm && !perm.granted) {
         setError("Microphone access denied — showing simulation");
         setIsSimulation(true);
         startSimulation();
         return;
       }
     } catch {
-      setError("Microphone unavailable — showing simulation");
-      setIsSimulation(true);
-      startSimulation();
-      return;
+      // Permission helper unavailable in some versions; startRecording will
+      // request it if needed.
     }
 
-    nativeFillRef.current = 0;
-    nativeFreqsRef.current = [];
-
-    let loggedShape = false;
-    const onAudio = async (event: AudioDataEvent) => {
-      // event.data shape varies by platform/format:
-      //  - Float32Array: Android (new arch) / web float32
-      //  - Array<number>: iOS with streamFormat 'float32'
-      //  - base64 string: raw PCM16 fallback
-      let chunk: Float32Array;
-      const data = event.data as unknown;
-      if (!loggedShape) {
-        loggedShape = true;
-        const kind = data instanceof Float32Array
-          ? "Float32Array"
-          : Array.isArray(data)
-            ? "Array"
-            : typeof data;
-        const len =
-          data instanceof Float32Array || Array.isArray(data)
-            ? (data as { length: number }).length
-            : typeof data === "string"
-              ? data.length
-              : 0;
-        const sample =
-          data instanceof Float32Array || Array.isArray(data)
-            ? Array.from((data as number[]).slice(0, 5))
-            : null;
-        console.log("[tuner] audio chunk:", { kind, len, sample });
-      }
-      if (data instanceof Float32Array) {
-        chunk = data;
-      } else if (Array.isArray(data)) {
-        chunk = Float32Array.from(data as number[]);
-      } else if (typeof data === "string") {
-        chunk = base64Pcm16ToFloat32(data);
-      } else {
-        return;
-      }
-
-      const buf = nativeBufRef.current;
-      let fill = nativeFillRef.current;
-
-      for (let i = 0; i < chunk.length; i++) {
-        buf[fill++] = chunk[i];
-        if (fill >= NATIVE_BUFFER_SIZE) {
-          const freq = autoCorrelate(buf, NATIVE_SAMPLE_RATE);
-          if (freq > 27 && freq < 4200) {
-            const recent = nativeFreqsRef.current;
-            recent.push(freq);
-            if (recent.length > 5) recent.shift();
-            const sorted = [...recent].sort((a, b) => a - b);
-            const median = sorted[Math.floor(sorted.length / 2)];
-            setCurrentNote(frequencyToNote(median));
-          }
-          fill = 0;
-        }
-      }
-      nativeFillRef.current = fill;
-    };
-
     try {
-      await ExpoAudioStreamModule.startRecording({
+      await recorder.startRecording({
         sampleRate: NATIVE_SAMPLE_RATE,
         channels: 1,
         encoding: "pcm_16bit",
-        streamFormat: "float32",
         interval: 100,
-        onAudioStream: onAudio,
+        onAudioStream: handleAudioStream,
       });
-      // Teardown is handled by stopRecording(); no separate subscription object.
-      nativeSubRef.current = { remove: () => {} };
       setIsSimulation(false);
     } catch {
       setError("Microphone unavailable — showing simulation");
       setIsSimulation(true);
       startSimulation();
     }
-  }, [startSimulation]);
+  }, [recorder, handleAudioStream, startSimulation]);
 
   const start = useCallback(async () => {
     setError(null);
@@ -369,9 +343,12 @@ export function useAudioAnalyzer(): AudioAnalyzerResult {
 
   const stop = useCallback(() => {
     stopInternal();
+    if (Platform.OS !== "web") {
+      recorder.stopRecording?.().catch(() => {});
+    }
     setIsListening(false);
     setCurrentNote(null);
-  }, [stopInternal]);
+  }, [stopInternal, recorder]);
 
   useEffect(() => () => stopInternal(), [stopInternal]);
 
